@@ -2,6 +2,7 @@ package com.bookstore.v1.services;
 
 import com.bookstore.v1.data.*;
 import com.bookstore.v1.dto.*;
+import com.bookstore.v1.exception.DuplicateObjectException;
 import com.bookstore.v1.exception.EmptyFieldException;
 import com.bookstore.v1.exception.EntityNotFoundException;
 import com.bookstore.v1.exception.InvalidDoubleRange;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -85,7 +87,7 @@ public class WishlistService {
                 .collect(Collectors.toList());
     }
 
-    public WishlistDTO addBook(String bookId, String wishlistId)  throws EntityNotFoundException{
+    public WishlistDTO addBook(String wishlistId, String bookId)  throws EntityNotFoundException, DuplicateObjectException{
         Optional<Wishlist> wishlistOpt = wishlistRepository.findById(wishlistId);
         if (wishlistOpt.isEmpty()) {
             throw new EntityNotFoundException("wishlist");
@@ -96,6 +98,12 @@ public class WishlistService {
             throw new EntityNotFoundException("book");
         }
         Book book = bookOpt.get();
+        for(Book b : wishlist.getBooks()){
+            System.out.println(b);
+            if(Objects.equals(b.getId(), book.getId())){
+                throw new DuplicateObjectException("duplicated book in wishlist");
+            }
+        }
 
         wishlist.addBook(book);
         wishlistRepository.save(wishlist);
