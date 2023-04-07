@@ -33,7 +33,7 @@ pipeline {
         stage("Build & push new image") {
             steps {
                 sh "docker build -t $DOCKER_HUB_CREDS_USR/hello-img:${env.IMAGE_TAG} ."
-                sh "echo $DOCKER_HUB_CREDS_PSW | docker login docker.io -u $DOCKER_HUB_CREDS_USR --password-stdin"
+                sh "echo \$DOCKER_HUB_CREDS_PSW | docker login docker.io -u $DOCKER_HUB_CREDS_USR --password-stdin"
                 sh "docker push $DOCKER_HUB_CREDS_USR/hello-img:${env.IMAGE_VERSION}"
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         stage("Update github latest image tag") {
             steps {
                 sh "git tag ${env.IMAGE_TAG}"
-                sh "git push https://$GITHUB_TOKEN_CREDS_PSW@github.com/UNIBUC-PROD-ENGINEERING-RUNTIME-TERROR/service.git ${env.IMAGE_TAG}"
+                sh "git push https://\$GITHUB_TOKEN_CREDS_PSW@github.com/UNIBUC-PROD-ENGINEERING-RUNTIME-TERROR/service.git ${env.IMAGE_TAG}"
             }
         }
 
