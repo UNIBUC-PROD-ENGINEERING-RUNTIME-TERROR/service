@@ -34,7 +34,7 @@ pipeline {
             steps {
                 sh "docker build -t $DOCKER_HUB_CREDS_USR/hello-img:${env.IMAGE_TAG} ."
                 sh "echo \$DOCKER_HUB_CREDS_PSW | docker login docker.io -u $DOCKER_HUB_CREDS_USR --password-stdin"
-                sh "docker push $DOCKER_HUB_CREDS_USR/hello-img:${env.IMAGE_VERSION}"
+                sh "docker push $DOCKER_HUB_CREDS_USR/hello-img:${env.IMAGE_TAG}"
             }
         }
 
