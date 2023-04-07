@@ -47,7 +47,8 @@ pipeline {
 
         stage ("Deploy & run integration tests") {
             steps {
-                sh "IMAGE_TAG=${env.IMAGE_TAG} DOCKER_HUB_USERNAME=$DOCKER_HUB_CREDS_USR docker compose up -d hello"
+//                 sh "IMAGE_TAG=${env.IMAGE_TAG} DOCKER_HUB_USERNAME=$DOCKER_HUB_CREDS_USR docker compose up -d hello"
+                sh 'kubectl apply -f kubernetes/hello.yaml'
                 sh "./gradlew testIT"
                 sh "./gradlew testE2E"
             }
