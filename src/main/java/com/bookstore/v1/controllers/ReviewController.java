@@ -9,16 +9,23 @@ import com.bookstore.v1.exception.InvalidDoubleRange;
 import com.bookstore.v1.services.ReviewService;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/review")
 public class ReviewController {
     @Autowired
     private ReviewService reviewService;
+
+    @Autowired
+    private MeterRegistry metricsRegistry;
+    private final AtomicLong badRequestCounter = new AtomicLong();
 
     @PostMapping("/add-review")
     @ResponseBody
@@ -76,5 +83,24 @@ public class ReviewController {
     @Counted(value = "bookstore.review.get.user.reviews.count", description = "Number of times all reviews for a user are retrieved")
     public List<ReviewDTO> getUserReviews(@PathVariable String userId) throws EntityNotFoundException {
         return reviewService.getUserReviews(userId);
+    }
+
+    @GetMapping("/get-review-broken/{reviewId}")
+    @ResponseBody
+    @Timed(value = "bookstore.review.get.review.broken.time", description = "Time taken to get a review broken method")
+    @Counted(value = "bookstore.review.get.review.broken.count", description = "Number of times a review is retrieved broken method")
+    public ReviewDTO getReviewBroken(@PathVariable String reviewId) throws EntityNotFoundException,
+            InterruptedException {
+        // coin flip to simulate broken return of review for metric testing
+        var isBroken = new Random().nextInt(2);
+        if (isBroken == 0) {
+            metricsRegistry
+                    .counter("error_on_return_review_broken_count", "endpoint", "get_review_broken")
+                    .increment(badRequestCounter.incrementAndGet());
+            throw new EntityNotFoundException("Review not found");
+        }
+        // simulate long response time for slow metric testing
+        Thread.sleep(100 * new Random().nextInt(20));
+        return reviewService.getReviewById(reviewId);
     }
 }
