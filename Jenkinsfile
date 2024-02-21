@@ -6,6 +6,16 @@ pipeline {
     }
 
     stages {
+        stage ('Manual Input') {
+          agent none
+            when {
+                expression { params.Input == 'Yes' }
+            }
+            steps {
+                input message: "Please Approve", ok: 'Approve'
+            }
+        }
+
         stage("Build & Test") {
             steps {
                 sh "./gradlew clean build"
@@ -45,15 +55,6 @@ pipeline {
             }
         }
 
-        stage ('Manual Input') {
-          agent none
-            when {
-                expression { params.Input == 'Yes' }
-            }
-            steps {
-                input message: "Please Approve", ok: 'Approve'
-            }
-        }
 
         stage ("Deploy & run integration tests") {
             steps {
