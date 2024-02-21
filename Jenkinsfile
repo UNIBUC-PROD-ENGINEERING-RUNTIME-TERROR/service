@@ -5,6 +5,13 @@ pipeline {
         GITHUB_TOKEN_CREDS = credentials("github_token")
     }
 
+    
+    parameters {
+        choice(choices: "No\nYes",
+            description: 'Choose Yes to wait for Manual Input',
+            name: 'Input')
+    }
+
     stages {
         stage ('Manual Input') {
           agent none
